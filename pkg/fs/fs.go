@@ -5,34 +5,28 @@ import (
 	"os"
 )
 
+type cipherFunc func(data, pass []byte) ([]byte, error)
+
 func Decrypt(path string, pass []byte) error {
-	file, err := os.ReadFile(path)
-
-	if err != nil {
-		return err
-	}
-
-	dec, err := cipher.Decrypt(file, pass)
-
-	if err != nil {
-		return err
-	}
-
-	return os.WriteFile(path, dec, 0644)
+	return processFile(path, pass, cipher.Decrypt)
 }
 
 func Encrypt(path string, pass []byte) error {
+	return processFile(path, pass, cipher.Encrypt)
+}
+
+func processFile(path string, pass []byte, process cipherFunc) error {
 	file, err := os.ReadFile(path)
 
 	if err != nil {
 		return err
 	}
 
-	enc, err := cipher.Encrypt(file, pass)
+	result, err := process(file, pass)
 
 	if err != nil {
 		return err
 	}
 
-	return os.WriteFile(path, enc, 0644)
+	return os.WriteFile(path, result, 0644)
 }
